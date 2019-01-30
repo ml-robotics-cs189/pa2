@@ -1,0 +1,7 @@
+<launch>
+ <include file="$(find heron_bringup)/launch/catalina_island_single.launch"/>
+ <node pkg="pa2" type="expanding_square.py" name="expanding_square" output="screen"/>
+ <include file="$(find pa2)/launch/log.launch">
+  <arg name="prefix" value="expanding_square"/>
+ </include>
+</launch>
