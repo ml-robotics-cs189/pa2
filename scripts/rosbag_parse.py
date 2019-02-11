@@ -1,6 +1,7 @@
 import rosbag
 import numpy as np
 import matplotlib.pyplot as plt 
+import gp
 
 
 ######
@@ -13,7 +14,7 @@ import matplotlib.pyplot as plt
 	# Is this the right data? 
 ######
 
-bagfile = '../bagfiles/random_waypoints_2019-01-29-23-18-41.bag'
+bagfile = '/home/cs89/catkin_ws/src/team1/bagfiles/random.bag'
 sensor_topic = '/kf1/simulated_sensor/raw'
 
 
@@ -38,12 +39,19 @@ def readmsg():
 		#sensor_type[i] = msg.type
 		i += 1
 
-	print(sensor_data)
+	gps_data = []
+	for i in range(0, sensor_msg_cnt):
+		item = sensor_lat[i], sensor_long[i]
+		gps_data.append(tuple(item))
+
+	print("Sensor: " , sensor_data)
+	print("GPS: ", gps_data)
 
 	bag.close()
 
 
 if __name__ == "__main__":
 	readmsg()
-
-	# store data in arrays
+  
+	
+# store data in arrays
