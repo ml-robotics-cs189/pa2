@@ -1,48 +1,79 @@
 import rosbag
-import parse_bagfiles
 import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+from IPython.display import display
 import matplotlib.pyplot as plt
 import GPy
 
 class GP:
 
 	def __init__(self):
-		
+		self.bagfile = '/home/darobot/random.bag'
+		self.sensor_topic = '/kf1/simulated_sensor/raw'
+		self.bag = rosbag.Bag(self.bagfile)
+		sensor_msg_cnt = self.bag.get_message_count(self.sensor_topic)
 
-	def readmsg(self):
-		bagfile = '/home/cs89/catkin_ws/src/team1/bagfiles/random.bag'
-		sensor_topic = '/kf1/simulated_sensor/raw'
+		self.gps_data = np.zeros((sensor_msg_cnt, 2))
+		self.sensor_data = np.zeros((sensor_msg_cnt, 1))
+
+		self.readbag()
+		self.gaussian_proc()
+
+
+	def readbag(self):
+
+
 
 		i = 0 	# iterator
 
-    # water quality data
-		sensor_lat = np.zeros([sensor_msg_cnt])
-		sensor_long = np.zeros([sensor_msg_cnt])
-		sensor_data = np.zeros([sensor_msg_cnt])
-	#sensor_type = np.zeros([sensor_msg_cnt])
+		for topic, msg, t in self.bag.read_messages(topics=self.sensor_topic):
+			self.sensor_data[i] = [ msg.data ]
+			self.gps_data[i] = [ msg.latitude, msg.longitude ]
 
-	# loop over the topic to read evey message
-		for topic, msg, t in bag.read_messages(topics=sensor_topic):
-			sensor_lat[i] = msg.latitude
-			sensor_long[i] = msg.longitude
-			sensor_data[i] = msg.data
-		#sensor_type[i] = msg.type
 			i += 1
 
-		gps_data = []
-		for i in range(0, sensor_msg_cnt):
-			item = sensor_lat[i], sensor_long[i]
-			gps_data.append(tuple(item))
+		self.bag.close()
 
-		print("Sensor: " , sensor_data)
-		print("GPS: ", gps_data)
+		#print("Sensor: " , self.sensor_data)
+		print("GPS: ", self.gps_data)
 
-		bag.close()
+
+	def gaussian_proc(self):
+		fig = plt.figure()
+		ax = fig.add_subplot(111, projection='3d')
+
+		ax.scatter(self.gps_data[:,0], self.gps_data[:,1], self.sensor_data)
+
+		#plt.show()
+
+		kernel = GPy.kern.RBF(2)
+		model = GPy.models.GPRegression(self.gps_data, self.sensor_data, kernel)
+
+		model.optimize(messages=True,max_f_eval = 1000)
+		model.plot()
+		display(model)
+
+		X0 = np.arange(33.44443, 33.44507, 0.00001)
+		X1 = np.arange(-118.48498, -118.48413, 0.00001)
+
+		X0_grid, X1_grid = np.meshgrid(X0, X1)
+
+		X_grid_test = np.transpose(np.vstack([X0_grid.ravel(), X1_grid.ravel()]))
+
+		Y, V = model.predict(X_grid_test)
+
+		Y_grid = Y.reshape(X0_grid.shape)
+		V_grid = V.reshape(X0_grid.shape)
+
+		plt.contourf(X0_grid, X1_grid, V_grid)
+		plt.colorbar()
+		plt.figure(0)
+		plt.contourf(X0_grid, X1_grid, Y_grid)
+		plt.colorbar()
+
+		plt.show()
+
+
 
 if __name__ == "__main__":
 	gp = GP()
-	
-	
-
-
-
