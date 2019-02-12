@@ -25,6 +25,7 @@ class GP:
 		print("Reading bagfile \"" + self.bagfile + "\"")
 		self.bag = rosbag.Bag(self.bagfile)
 		sensor_msg_cnt = self.bag.get_message_count(self.sensor_topic)
+		print("Read %d messages from the bagfile. " % sensor_msg_cnt)
 
 		self.gps_data = np.zeros((sensor_msg_cnt, 2))
 		self.sensor_data = np.zeros((sensor_msg_cnt, 1))
@@ -34,11 +35,7 @@ class GP:
 
 
 	def readbag(self):
-
-
-
 		i = 0 	# iterator
-
 		for topic, msg, t in self.bag.read_messages(topics=self.sensor_topic):
 			self.sensor_data[i] = [ msg.data ]
 			self.gps_data[i] = [ msg.latitude, msg.longitude ]
@@ -47,8 +44,6 @@ class GP:
 
 		self.bag.close()
 
-		#print("Sensor: " , self.sensor_data)
-		print("GPS: ", self.gps_data)
 
 
 	def gaussian_proc(self):
