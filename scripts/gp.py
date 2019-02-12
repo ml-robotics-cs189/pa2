@@ -31,7 +31,6 @@ class GP:
 		self.sensor_data = np.zeros((sensor_msg_cnt, 1))
 
 		self.readbag()
-		self.gaussian_proc()
 
 
 	def readbag(self):
@@ -45,14 +44,18 @@ class GP:
 		self.bag.close()
 
 
+	def show_sensor_data(self, save_to_file=False):
 
-	def gaussian_proc(self):
 		fig = plt.figure()
 		ax = fig.add_subplot(111, projection='3d')
-
 		ax.scatter(self.gps_data[:,0], self.gps_data[:,1], self.sensor_data)
+		if save_to_file:
+			plt.savefig("sensor_data.pdf")
+		else:
+			plt.show()
 
-		plt.show()
+
+	def gaussian_proc(self, save_to_file=False):
 
 		kernel = GPy.kern.RBF(2)
 		model = GPy.models.GPRegression(self.gps_data, self.sensor_data, kernel)
@@ -60,7 +63,6 @@ class GP:
 		model.optimize(messages=True,max_f_eval = 1000)
 		model.plot()
 		display(model)
-
 		X0 = np.arange(33.44443, 33.44507, 0.00001)
 		X1 = np.arange(-118.48498, -118.48413, 0.00001)
 
