@@ -4,12 +4,25 @@ from mpl_toolkits.mplot3d import Axes3D
 from IPython.display import display
 import matplotlib.pyplot as plt
 import GPy
+import json
 
 class GP:
 
 	def __init__(self):
-		self.bagfile = '/home/darobot/random.bag'
+
+		# read the bag file LOCATION from a json file:
+		try:
+			with open('bagfile_location.json') as f:
+				data = json.load(f)
+				self.bagfile = data["bagfile_path"]
+		except IOError:
+			print("Please create a JSON file containing the location of your " +
+				"bag file. \nCreate a dictionary, set the key \"bagfile_path\" equal " +
+				"to the path, and save to a file named \"bagfile_location.json\".")
+			return
+		
 		self.sensor_topic = '/kf1/simulated_sensor/raw'
+		print("Reading bagfile \"" + self.bagfile + "\"")
 		self.bag = rosbag.Bag(self.bagfile)
 		sensor_msg_cnt = self.bag.get_message_count(self.sensor_topic)
 
@@ -44,7 +57,7 @@ class GP:
 
 		ax.scatter(self.gps_data[:,0], self.gps_data[:,1], self.sensor_data)
 
-		#plt.show()
+		plt.show()
 
 		kernel = GPy.kern.RBF(2)
 		model = GPy.models.GPRegression(self.gps_data, self.sensor_data, kernel)
@@ -77,3 +90,5 @@ class GP:
 
 if __name__ == "__main__":
 	gp = GP()
+
+

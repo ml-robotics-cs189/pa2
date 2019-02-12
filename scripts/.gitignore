@@ -1,0 +1,2 @@
+# ignore json since we use them to store local settings
+*.json
