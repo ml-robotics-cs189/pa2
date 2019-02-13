@@ -1,5 +1,3 @@
-import rosbag
-import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 from IPython.display import display
 import matplotlib.pyplot as plt
@@ -8,61 +6,23 @@ import json
 
 class GP:
 
-	def __init__(self):
-
-		# read the bag file LOCATION from a json file:
-		try:
-			with open('bagfile_location.json') as f:
-				data = json.load(f)
-				self.bagfile = data["bagfile_path"]
-		except IOError:
-			print("Please create a JSON file containing the location of your " +
-				"bag file. \nCreate a dictionary, set the key \"bagfile_path\" equal " +
-				"to the path, and save to a file named \"bagfile_location.json\".")
-			return
-		
-		self.sensor_topic = '/kf1/simulated_sensor/raw'
-		print("Reading bagfile \"" + self.bagfile + "\"")
-		self.bag = rosbag.Bag(self.bagfile)
-		sensor_msg_cnt = self.bag.get_message_count(self.sensor_topic)
-		print("Read %d messages from the bagfile. " % sensor_msg_cnt)
-
-		self.gps_data = np.zeros((sensor_msg_cnt, 2))
-		self.sensor_data = np.zeros((sensor_msg_cnt, 1))
-
-		self.readbag()
-
-
-	def readbag(self):
-		i = 0 	# iterator
-		for topic, msg, t in self.bag.read_messages(topics=self.sensor_topic):
-			self.sensor_data[i] = [ msg.data ]
-			self.gps_data[i] = [ msg.latitude, msg.longitude ]
-
-			i += 1
-
-		self.bag.close()
-
-
-	def show_sensor_data(self, save_to_file=False):
-
-		fig = plt.figure()
-		ax = fig.add_subplot(111, projection='3d')
-		ax.scatter(self.gps_data[:,0], self.gps_data[:,1], self.sensor_data)
-		if save_to_file:
-			plt.savefig("sensor_data.pdf")
-		else:
-			plt.show()
-
+	def __init__(self, gps_data, sensor_data):
+		self.gps_data = gps_data
+		self.sensor_data = sensor_data
 
 	def gaussian_proc(self, save_to_file=False):
+
+		print("here")
 
 		kernel = GPy.kern.RBF(2)
 		model = GPy.models.GPRegression(self.gps_data, self.sensor_data, kernel)
 
 		model.optimize(messages=True,max_f_eval = 1000)
+
 		model.plot()
+
 		display(model)
+
 		X0 = np.arange(33.44443, 33.44507, 0.00001)
 		X1 = np.arange(-118.48498, -118.48413, 0.00001)
 
@@ -83,9 +43,6 @@ class GP:
 
 		plt.show()
 
+		print("finished")
 
-
-if __name__ == "__main__":
-	gp = GP()
-
-
+		return model
