@@ -1,6 +1,7 @@
 from mpl_toolkits.mplot3d import Axes3D
 from IPython.display import display
 import matplotlib.pyplot as plt
+import numpy as np
 import GPy
 import json
 
@@ -10,11 +11,13 @@ class GP:
 		self.gps_data = gps_data
 		self.sensor_data = sensor_data
 
+
 	def gaussian_proc(self, save_to_file=False):
 
 		print("here")
 
 		kernel = GPy.kern.RBF(2)
+
 		model = GPy.models.GPRegression(self.gps_data, self.sensor_data, kernel)
 
 		model.optimize(messages=True,max_f_eval = 1000)
