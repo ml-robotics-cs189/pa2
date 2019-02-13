@@ -2,6 +2,8 @@ import rosbag
 import rospy
 import numpy as np
 import gp
+import json
+
 
 from sensor_msgs.msg import NavSatFix
 from simulated_sensor.msg import Measurement
@@ -12,18 +14,18 @@ class node:
 
 	def __init__(self):
 
-		# read the bag file LOCATION from a json file:
-		#try:
-		#	with open('bagfile_location.json') as f:
-		#		data = json.load(f)
-		#		self.bagfile = data["bagfile_path"]
-		#except IOError:
-		#	print("Please create a JSON file containing the location of your " +
-		#		"bag file. \nCreate a dictionary, set the key \"bagfile_path\" equal " +
-		#		"to the path, and save to a file named \"bagfile_location.json\".")
-		#	return		
+		#read the bag file LOCATION from a json file:
+		try:
+			with open('bagfile_location.json') as f:
+				data = json.load(f)
+				self.bagfile = data["bagfile_path"]
+		except IOError:
+			print("Please create a JSON file containing the location of your " +
+				"bag file. \nCreate a dictionary, set the key \"bagfile_path\" equal " +
+				"to the path, and save to a file named \"bagfile_location.json\".")
+			return		
 
-		self.bagfile = '/home/cs89/catkin_ws/src/team1/pa2/bagfiles/lawnmower.bag'
+		#self.bagfile = '/home/cs89/catkin_ws/src/team1/pa2/bagfiles/lawnmower.bag'
 		
 		self.sensor_topic = '/kf1/simulated_sensor/raw'
 
@@ -99,7 +101,7 @@ class node:
 
 if __name__ == "__main__":
 	
-	rospy.init_node('gp_movement', anonymous=True)
+	#rospy.init_node('gp_movement', anonymous=True)
 
 	n = node()
 
