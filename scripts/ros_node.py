@@ -3,7 +3,6 @@ import rospy
 import numpy as np
 import gp
 import json
-
 from sensor_msgs.msg import NavSatFix
 from simulated_sensor.msg import Measurement
 
@@ -94,7 +93,7 @@ class node:
 
 if __name__ == "__main__":
 	
-	rospy.init_node('gp_movement', anonymous=True)
+	#rospy.init_node('gp_movement', anonymous=True)
 
 	n = node()
 
