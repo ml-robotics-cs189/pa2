@@ -21,10 +21,10 @@ class node:
 			print("Please create a JSON file containing the location of your " +
 				"bag file. \nCreate a dictionary, set the key \"bagfile_path\" equal " +
 				"to the path, and save to a file named \"bagfile_location.json\".")
-			return		
+			return
 
 		#self.bagfile = '/home/cs89/catkin_ws/src/team1/pa2/bagfiles/lawnmower.bag'
-		
+
 		self.sensor_topic = '/kf1/simulated_sensor/raw'
 
 		print("Reading bagfile \"" + self.bagfile + "\"")
@@ -40,7 +40,7 @@ class node:
 
 		self.sensor = rospy.Subscriber("/kf1/simulated_sensor/raw", Measurement, self.callback)
 
-		rospy.wait_for_message("/kf1/simulated_sensor/raw", Measurement)
+		#rospy.wait_for_message("/kf1/simulated_sensor/raw", Measurement)
 
 		self.cur_data = None
 		self.cur_data_lat = None
@@ -86,13 +86,13 @@ class node:
 			plt.savefig("sensor_data.pdf")
 		else:
 			plt.show()
-	
+
 
 
 
 
 if __name__ == "__main__":
-	
+
 	#rospy.init_node('gp_movement', anonymous=True)
 
 	n = node()
@@ -105,10 +105,7 @@ if __name__ == "__main__":
 
 	while not rospy.is_shutdown():
 		rospy.spin()
-	
+
 
 
 	#data_sub = ()
-
-
-

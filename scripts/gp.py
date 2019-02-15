@@ -10,6 +10,7 @@ class GP:
 	def __init__(self, gps_data, sensor_data):
 		self.gps_data = gps_data
 		self.sensor_data = sensor_data
+		print(self.sensor_data)
 
 
 	def gaussian_proc(self, save_to_file=False):
@@ -34,6 +35,8 @@ class GP:
 		X_grid_test = np.transpose(np.vstack([X0_grid.ravel(), X1_grid.ravel()]))
 
 		Y, V = model.predict(X_grid_test)
+
+		print(Y)
 
 		Y_grid = Y.reshape(X0_grid.shape)
 		V_grid = V.reshape(X0_grid.shape)
