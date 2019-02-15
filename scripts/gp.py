@@ -64,6 +64,7 @@ class GP:
 		# returns the mean: M and variance: V
 		M, V = self.model.predict(X_grid_test)
 		M_jac, V_kac = self.model.predictive_gradients(X_grid_test)
+		print(M)
 		print(M_jac)
 
 		# fit it to the meshgrid
@@ -78,7 +79,7 @@ class GP:
 		plt.contourf(self.lat_mesh, self.lon_mesh, V_grid)
 		plt.colorbar()
 
-		plt.show()
+		#plt.show()
 
 		# ITERATE THROUGH SOME ARRAY OR MATRIX TO GET HOT SPOTS
 		# APPEND HOT SPOTS TO hot_spots
