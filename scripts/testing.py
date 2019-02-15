@@ -1,6 +1,4 @@
 
-
-
 import GPy
 import numpy as np 
 import matplotlib.pyplot as plt
@@ -32,9 +30,7 @@ model_X = np.transpose(
 	np.vstack([
 		X0.flatten(), 
 		X1.flatten()]))
-
 model_Y = Y.reshape(-1, 1)
-
 m = create_2d_model(model_X, model_Y)
 
 # check the model's predictions:
