@@ -9,7 +9,7 @@ import json
 
 class GP:
 
-	def __init__(self, gps_data, sensor_data):
+	def __init__(self):
 		self.gps_data = gps_data
 		self.sensor_data = sensor_data
 
@@ -37,7 +37,11 @@ class GP:
 		self.mean = np.array(self.mean)
 		self.var = np.array(self.var)
 
-		self.gaussian_proc()
+		# TEST
+		# # current coord, north coord, east coord, south coord, west coord
+		# self.gaussian_proc(np.array( [ [33.44470, -118.48496], [33.44470, -118.48497],
+		# 							[33.44471, -118.48496], [33.44470, -118.48495],
+		# 							[33.44469, -118.48496] ] ))
 
 
 	# set new data from the robot
@@ -47,9 +51,9 @@ class GP:
 
 
 	# sets the current gaussian process model
-	def gaussian_proc(self, save_to_file=False):
+	def gaussian_proc(self, cur_coord):
 
-		hot_spots = []
+		cur_grad_area = []
 
 		# learn the GP model and display it
 		self.model = GPy.models.GPRegression(self.gps_data, self.sensor_data, self.kernel)
@@ -57,15 +61,26 @@ class GP:
 		#self.model.plot()
 		display(self.model)
 
-		# match coordinates of the lake together in a meshgrid
+		# predict the model with the meshgrid of the lake
+		# returns the mean: M and variance: V
+		# M, V = self.model.predict(cur_coord)
+
+		# retreive the gradient values of the current coordinate and its neighbors
+		M_jac, V_kac = self.model.predictive_gradients(cur_coord)
+		for i in range(len(M_jac)):
+			cur_grad_area.append([ M_jac[i][0][0], M_jac[i][1][0] ])
+
+		return cur_grad_area
+
+
+	# calculate mean square error evaluation
+	def mse_eval( self ):
+
 		X_grid_test = np.transpose(np.vstack([self.lat_mesh.ravel(), self.lon_mesh.ravel()]))
 
 		# predict the model with the meshgrid of the lake
 		# returns the mean: M and variance: V
 		M, V = self.model.predict(X_grid_test)
-		M_jac, V_kac = self.model.predictive_gradients(X_grid_test)
-		print(M)
-		print(M_jac)
 
 		# fit it to the meshgrid
 		M_grid = M.reshape(self.lat_mesh.shape)
@@ -80,21 +95,6 @@ class GP:
 		plt.colorbar()
 
 		#plt.show()
-
-		# ITERATE THROUGH SOME ARRAY OR MATRIX TO GET HOT SPOTS
-		# APPEND HOT SPOTS TO hot_spots
-
-		return hot_spots
-
-
-	# calculate mean square error evaluation
-	def mse_eval( self ):
-
-		X_grid_test = np.transpose(np.vstack([self.lat_mesh.ravel(), self.lon_mesh.ravel()]))
-
-		# predict the model with the meshgrid of the lake
-		# returns the mean: M and variance: V
-		M, V = self.model.predict(X_grid_test)
 
 		# mean square error function
 		mse = np.mean((self.mean - M)**2)

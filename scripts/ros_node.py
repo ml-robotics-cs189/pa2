@@ -103,8 +103,8 @@ if __name__ == "__main__":
 	print("after gp")
 	#model = process.gaussian_proc()
 
-	while not rospy.is_shutdown():
-		rospy.spin()
+	#while not rospy.is_shutdown():
+	#	rospy.spin()
 
 
 
