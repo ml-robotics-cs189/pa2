@@ -10,8 +10,9 @@ import json
 class GP:
 
 	def __init__(self):
-		self.gps_data = gps_data
-		self.sensor_data = sensor_data
+
+		self.gps_data = None
+		self.sensor_data = None
 
 		# initialize kernel and model to be used
 		self.kernel = GPy.kern.RBF(2)
@@ -48,6 +49,8 @@ class GP:
 	def add_data(self, new_gps_data, new_sensor_data):
 		self.gps_data = new_gps_data
 		self.sensor_data = new_sensor_data
+
+		#print("From GP: ", self.gps_data, self.sensor_data)
 
 
 	# sets the current gaussian process model
