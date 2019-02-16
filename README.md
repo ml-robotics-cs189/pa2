@@ -14,10 +14,11 @@ Then, still in the catkin workspace, run:
 
 `>> catkin_make`
 
-Once this is complete the launch files can be executed from anywhere in
-the catkin workspace. Type:
+`>> roslaunch pa2 ros_node.launch`
 
-`>>catkin_ws roslaunch/pa2 <filename>.launch`
+To run the bag parsing file, go to the scripts folder in pa2 and run:
+
+`>> python rosbag_parse.py`
 
 ## Specify Bag File Paths
 Since the bag files are very large, we do not include them within our repository.  You can download them [here](https://drive.google.com/drive/folders/1OxkBHOT-Hb2OxJMV2XRGGcuJqOcw74yY?usp=sharing). Once the bagfiles are downloaded, you will need to create a `bagfile_location.json` and add to it your bagfile paths.  For example:

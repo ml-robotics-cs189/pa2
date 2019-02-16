@@ -1,8 +1,0 @@
-<launch>
- <include file="$(find heron_bringup)/launch/catalina_island_single.launch"/>
- <node pkg="pa2" type="lawnmower.py" name="lawnmower" output="screen"/>
- <include file="$(find pa2)/launch/log.launch" >
-  <arg name="prefix" value="lawnmower"/>
- </include>
-</launch>
- 

@@ -1,8 +1,0 @@
-<launch>
- <include file="$(find heron_bringup)/launch/catalina_island_single.launch"/>
- <node pkg="pa2" type="random_waypoints.py" name="random_waypoints" output="screen"/>
-
- <include file="$(find pa2)/launch/log.launch">
-  <arg name="prefix" value="random_waypoints"/>
- </include>
-</launch>
