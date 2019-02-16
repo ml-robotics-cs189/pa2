@@ -26,15 +26,15 @@ class GP:
 
 		self.lat_mesh = self.ground_truth['latMesh']
 		self.lon_mesh = self.ground_truth['lonMesh']
-		mean_mat = self.ground_truth['zMean']
+		self.mean_mat = self.ground_truth['zMean']
 		var_mat = self.ground_truth['zVar']
 
 		self.mean = []
 		self.var = []
 
-		for w in range(len(mean_mat)):
-			for q in range(len(mean_mat[w])):
-				self.mean.append(mean_mat[w][q])
+		for w in range(len(self.mean_mat)):
+			for q in range(len(self.mean_mat[w])):
+				self.mean.append(self.mean_mat[w][q])
 				self.var.append(var_mat[w][q])
 
 		self.mean = np.array(self.mean)
@@ -76,13 +76,13 @@ class GP:
 
 			gradient = np.squeeze(M_jac)
 
-			if np.linalg.norm(gradient) == 0: 
+			if np.linalg.norm(gradient) == 0:
 				gradient = [1, 0.5]
-		#display(X, mean, "figures/model_%d" % i, 
+		#display(X, mean, "figures/model_%d" % i,
 	     #   visited=points,
 	      #  arrow=(curr_pos[0], curr_pos[1], gradient[0], gradient[1]))
 
-	    
+
 	    # update the current location:
 			next_pos = curr_pos + gradient
 
@@ -104,13 +104,13 @@ class GP:
 
 			gradient = np.squeeze(M_jac)
 
-			if np.linalg.norm(gradient) == 0: 
+			if np.linalg.norm(gradient) == 0:
 				gradient = [1, 0.5]
-		#display(X, mean, "figures/model_%d" % i, 
+		#display(X, mean, "figures/model_%d" % i,
 	     #   visited=points,
 	      #  arrow=(curr_pos[0], curr_pos[1], gradient[0], gradient[1]))
 
-	    
+
 	    # update the current location:
 			next_pos = curr_pos + gradient
 
@@ -139,9 +139,9 @@ class GP:
 		plt.contourf(self.lat_mesh, self.lon_mesh, V_grid)
 		plt.colorbar()
 
-		#plt.show()
+		plt.show()
 
 		# mean square error function
-		mse = np.mean((self.mean - M)**2)
+		mse = ((self.mean_mat - M_grid)**2).mean(axis=None)
 
 		print("\n" + "Mean square error: " + str(mse) + "\n")

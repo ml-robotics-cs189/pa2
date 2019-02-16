@@ -1,7 +1,9 @@
 import rosbag
 import numpy as np
-import matplotlib.pyplot as plt 
-import gp
+import matplotlib.pyplot as plt
+from IPython.display import display
+from scipy.io import loadmat
+import GPy
 import json
 
 
@@ -22,42 +24,17 @@ except IOError:
 
 sensor_topic = '/kf1/simulated_sensor/raw'
 
-
-
-# read messages
-def readmsg(file):
-	bag = rosbag.Bag(file)
-	sensor_msg_cnt = bag.get_message_count(sensor_topic)
-
-	i = 0 	# iterator
-
-    # water quality data
-	sensor_lat = np.zeros([sensor_msg_cnt])
-	sensor_long = np.zeros([sensor_msg_cnt])
-	sensor_data = np.zeros([sensor_msg_cnt])
-
-	# loop over the topic to read evey message
-	for topic, msg, t in bag.read_messages(topics=sensor_topic):
-		sensor_lat[i] = msg.latitude
-		sensor_long[i] = msg.longitude
-		sensor_data[i] = msg.data
-		#sensor_type[i] = msg.type
-		i += 1
-
-	gps_data = []
-	for i in range(0, sensor_msg_cnt):
-		item = sensor_lat[i], sensor_long[i]
-		gps_data.append(tuple(item))
-
-	bag.close()
-
-
 def parseBag(bag, file_num):
-	readBag(bag)
+	gps_data, sensor_data = readBag(bag)
 	plotBag(gps_data, sensor_data, True, file_num)
 
 
 def readBag(bag):
+
+	# water quality data
+	gps_data = np.zeros((sensor_msg_cnt, 2))
+	sensor_data = np.zeros((sensor_msg_cnt, 1))
+
 	# read the bagfile
 	i = 0 	# iterator
 	for topic, msg, t in bag.read_messages(topics=sensor_topic):
@@ -70,12 +47,46 @@ def readBag(bag):
 
 	bag.close()
 
+	return gps_data, sensor_data
+
+
 
 def plotBag(gps_data, sensor_data, save_to_file=False, file_num = 0):
+	# initialize kernel and model to be used
+	kernel = GPy.kern.RBF(2)
 
-	fig = plt.figure()
-	ax = fig.add_subplot(111, projection='3d')
-	ax.scatter(gps_data[:,0], gps_data[:,1], sensor_data)
+	# ground truth of the chlorophyl data
+	ground_truth_file = 'Catalina14072016__2009-01-18-04-28-50.mat'
+	ground_truth = loadmat(ground_truth_file)
+
+	lat_mesh = ground_truth['latMesh']
+	lon_mesh = ground_truth['lonMesh']
+
+	# learn the GP model and display it
+	model = GPy.models.GPRegression(gps_data, sensor_data, kernel)
+	model.optimize(messages=True,max_f_eval = 1000)
+	#self.model.plot()
+	display(model)
+
+	X_grid_test = np.transpose(np.vstack([lat_mesh.ravel(), lon_mesh.ravel()]))
+
+	# predict the model with the meshgrid of the lake
+	# returns the mean: M and variance: V
+	M, V = model.predict(X_grid_test)
+
+	# fit it to the meshgrid
+	M_grid = M.reshape(lat_mesh.shape)
+	V_grid = V.reshape(lon_mesh.shape)
+
+	# draw diagrams of GP
+	plt.figure("Mean Grid")
+	plt.contourf(lat_mesh, lon_mesh, M_grid)
+	plt.colorbar()
+
+	# TEST: shows raw data that was collected
+	# fig = plt.figure()
+	# ax = fig.add_subplot(111, projection='3d')
+	# ax.scatter(gps_data[:,0], gps_data[:,1], sensor_data)
 
 	if save_to_file:
 		plt.savefig("sensor_data_" + str(file_num) + ".pdf")
@@ -90,12 +101,5 @@ if __name__ == "__main__":
 
 		sensor_msg_cnt = bag.get_message_count(sensor_topic)
 
-		# water quality data
-		gps_data = np.zeros((sensor_msg_cnt, 2))
-		sensor_data = np.zeros((sensor_msg_cnt, 1))
-
 		parseBag(bag, file_num)
 		file_num += 1
-  
-	
-# store data in arrays
