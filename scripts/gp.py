@@ -6,6 +6,8 @@ import numpy as np
 import GPy
 import json
 
+#from numpy import linalg.linalg.LinAlgError
+
 
 class GP:
 
@@ -24,15 +26,15 @@ class GP:
 
 		self.lat_mesh = self.ground_truth['latMesh']
 		self.lon_mesh = self.ground_truth['lonMesh']
-		mean_mat = self.ground_truth['zMean']
+		self.mean_mat = self.ground_truth['zMean']
 		var_mat = self.ground_truth['zVar']
 
 		self.mean = []
 		self.var = []
 
-		for w in range(len(mean_mat)):
-			for q in range(len(mean_mat[w])):
-				self.mean.append(mean_mat[w][q])
+		for w in range(len(self.mean_mat)):
+			for q in range(len(self.mean_mat[w])):
+				self.mean.append(self.mean_mat[w][q])
 				self.var.append(var_mat[w][q])
 
 		self.mean = np.array(self.mean)
@@ -54,26 +56,68 @@ class GP:
 
 
 	# sets the current gaussian process model
-	def gaussian_proc(self, cur_coord):
+	def gaussian_proc(self, curr_pos):
 
 		cur_grad_area = []
 
 		# learn the GP model and display it
-		self.model = GPy.models.GPRegression(self.gps_data, self.sensor_data, self.kernel)
-		self.model.optimize(messages=True,max_f_eval = 1000)
-		#self.model.plot()
-		display(self.model)
+		try:
+			self.model = GPy.models.GPRegression(self.gps_data, self.sensor_data, self.kernel)
+			self.model.optimize(messages=True,max_f_eval = 1000)
+			#self.model.plot()
+			display(self.model)
 
-		# predict the model with the meshgrid of the lake
-		# returns the mean: M and variance: V
-		# M, V = self.model.predict(cur_coord)
+			# predict the model with the meshgrid of the lake
+			# returns the mean: M and variance: V
+			# M, V = self.model.predict(cur_coord)
 
-		# retreive the gradient values of the current coordinate and its neighbors
-		M_jac, V_kac = self.model.predictive_gradients(cur_coord)
-		for i in range(len(M_jac)):
-			cur_grad_area.append([ M_jac[i][0][0], M_jac[i][1][0] ])
+			# retreive the gradient values of the current coordinate and its neighbors
+			M_jac, V_kac = self.model.predictive_gradients(curr_pos)
 
-		return cur_grad_area
+			gradient = np.squeeze(M_jac)
+
+			if np.linalg.norm(gradient) == 0:
+				gradient = [1, 0.5]
+		#display(X, mean, "figures/model_%d" % i,
+	     #   visited=points,
+	      #  arrow=(curr_pos[0], curr_pos[1], gradient[0], gradient[1]))
+
+
+	    # update the current location:
+			next_pos = curr_pos + gradient
+
+			return next_pos
+
+		except np.linalg.LinAlgError:
+
+			#self.model = GPy.models.GPRegression(self.gps_data, self.sensor_data, self.kernel)
+			self.model.optimize(messages=True,max_f_eval = 1000)
+			#self.model.plot()
+			display(self.model)
+
+			# predict the model with the meshgrid of the lake
+			# returns the mean: M and variance: V
+			# M, V = self.model.predict(cur_coord)
+
+			# retreive the gradient values of the current coordinate and its neighbors
+			M_jac, V_kac = self.model.predictive_gradients(curr_pos)
+
+			gradient = np.squeeze(M_jac)
+
+			if np.linalg.norm(gradient) == 0:
+				gradient = [1, 0.5]
+		#display(X, mean, "figures/model_%d" % i,
+	     #   visited=points,
+	      #  arrow=(curr_pos[0], curr_pos[1], gradient[0], gradient[1]))
+
+
+	    # update the current location:
+			next_pos = curr_pos + gradient
+
+			self.mse_eval()
+
+			return next_pos
+
 
 
 	# calculate mean square error evaluation
@@ -100,6 +144,6 @@ class GP:
 		#plt.show()
 
 		# mean square error function
-		mse = np.mean((self.mean - M)**2)
+		mse = ((self.mean_mat - M_grid)**2).mean(axis=None)
 
 		print("\n" + "Mean square error: " + str(mse) + "\n")
