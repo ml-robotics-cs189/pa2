@@ -114,6 +114,8 @@ class GP:
 	    # update the current location:
 			next_pos = curr_pos + gradient
 
+			self.mse_eval()
+
 			return next_pos
 
 
@@ -139,7 +141,7 @@ class GP:
 		plt.contourf(self.lat_mesh, self.lon_mesh, V_grid)
 		plt.colorbar()
 
-		plt.show()
+		#plt.show()
 
 		# mean square error function
 		mse = ((self.mean_mat - M_grid)**2).mean(axis=None)
