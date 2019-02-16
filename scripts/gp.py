@@ -86,6 +86,8 @@ class GP:
 	    # update the current location:
 			next_pos = curr_pos + gradient
 
+			self.mse_eval()
+
 			return next_pos
 
 		except np.linalg.LinAlgError:

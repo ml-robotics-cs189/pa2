@@ -82,7 +82,7 @@ class node:
 		self.cur_data_lat = sensor.latitude
 		self.cur_data_long = sensor.longitude
 
-		print(self.cur_data_lat, self.cur_data_long)
+		#print(self.cur_data_lat, self.cur_data_long)
 
 		# adding current data readings to arrays
 		lat_long_data = [ self.cur_data_lat, self.cur_data_long ]
@@ -113,8 +113,8 @@ class node:
 
 		while(len(q) != 0):
 
-			
 
+			print("pop")
 			next = q.pop()
 
 			latitude = next[0]
@@ -132,17 +132,27 @@ class node:
 
 				print(predictive)
 
-				pred_latitude = predictive[0][0]
-				pred_longitude = predictive[0][1]
+				latitude = predictive[0][0]
+				longitude = predictive[0][1]
 
-				while(abs(self.cur_data_lat - latitude) > 0.0001 or abs(self.cur_data_long - longitude) > 0.0001):
-					self.set_waypoint(self.go_to, pred_latitude, pred_longitude)
+				point = Point(latitude, longitude)
 
-					self.gaussian.add_data(self.gps_data, self.sensor_data)
-					predictive = self.gaussian.gaussian_proc(np.array([[self.cur_data_lat, self.cur_data_long]]))
+				
 
-					pred_latitude = predictive[0][0]
-					pred_longitude = predictive[0][1]
+				if(abs(self.cur_data_lat - latitude) > 0.0001 or abs(self.cur_data_long - longitude) > 0.0001):
+
+					if(point.within(polygon)):
+							#point = Point(latitude, longitude)
+
+						#if(point.within(polygon)):
+
+						self.set_waypoint(self.go_to, latitude, longitude)
+
+						self.gaussian.add_data(self.gps_data, self.sensor_data)
+						predictive = self.gaussian.gaussian_proc(np.array([[self.cur_data_lat, self.cur_data_long]]))
+
+						latitude = predictive[0][0]
+						longitude = predictive[0][1]
 
 				#go back to gaussian
 
